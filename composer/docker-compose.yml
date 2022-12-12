@@ -33,3 +33,10 @@ services:
         environment:
           - MYSQL_DATABASE=keycloak
           - MYSQL_ROOT_PASSWORD=root
+    api-autenticacao:
+        image: api-autenticacao:staging
+        container_name: api-autenticacao
+        restart: always
+        tty: true
+        ports:
+          - 8081:8081

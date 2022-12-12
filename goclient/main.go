@@ -11,14 +11,14 @@ import (
 )
 
 var (
-	clientID     = "myclient"
-	clientSecret = "1vXmqPfIQpHQ3yK9zNiX0vHaANS23nIe"
+	clientID     = "nuclient"
+	clientSecret = "pgJAXZm2rUYjQC3ZBmaN2oFYiHUWTMWs"
 )
 
 func main() {
 	ctx := context.Background()
 
-	provider, err := oidc.NewProvider(ctx, "http://localhost:8080/realms/myrealm")
+	provider, err := oidc.NewProvider(ctx, "http://kubernetes.docker.internal:8080/realms/nubank")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -27,17 +27,25 @@ func main() {
 		ClientID:     clientID,
 		ClientSecret: clientSecret,
 		Endpoint:     provider.Endpoint(),
-		RedirectURL:  "http://localhost:8081/auth/callback",
+		RedirectURL:  "http://kubernetes.docker.internal:8081/auth/callback",
 		Scopes:       []string{oidc.ScopeOpenID, "profile", "email", "roles"},
 	}
 
 	state := "123"
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		log.Print("route access: /")
 		http.Redirect(w, r, config.AuthCodeURL(state), http.StatusFound)
 	})
 
+	http.HandleFunc("/api", func(w http.ResponseWriter, r *http.Request) {
+		log.Print("route access: /api")
+		data := []byte("api autenticacao")
+		w.Write(data)
+	})
+
 	http.HandleFunc("/auth/callback", func(w http.ResponseWriter, r *http.Request) {
+		log.Print("route access: /auth/callback")
 		if r.URL.Query().Get("state") != state {
 			http.Error(w, "State inválido", http.StatusBadRequest)
 			return
